@@ -5,12 +5,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 
+# 检测并设置设备
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+
 transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
 
-batch_size = 4
+batch_size = 16
 n_epochs = 10
 
 data_dir = './data/cifar-10-batches-py'
@@ -47,6 +51,7 @@ class cifarNet(nn.Module):
 writer = SummaryWriter('runs/cifar_experiment')
 
 Net = cifarNet()
+Net.to(device)  # 将模型移动到GPU
 Loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(Net.parameters(), lr=0.001, momentum=0.9)
 
@@ -55,6 +60,7 @@ for epoch in range(n_epochs):
     running_loss = 0.0
     for i, data in enumerate(cifar10_train_loader, 0):
         inputs, labels = data
+        inputs, labels = inputs.to(device), labels.to(device)  # 将数据移动到设备
         optimizer.zero_grad()
         outputs = Net(inputs)
         loss = Loss_fn(outputs, labels)
@@ -91,6 +97,7 @@ total = 0
 with torch.no_grad():
     for data in cifar10_test_loader:
         images, labels = data
+        images, labels = images.to(device), labels.to(device)  # 将数据移动到设备
         outputs = Net(images)
         _, predicted = torch.max(outputs, 1)
         total += labels.size(0)
