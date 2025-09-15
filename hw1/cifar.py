@@ -3,7 +3,6 @@ import torch
 from torchvision import datasets, transforms
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.tensorboard import SummaryWriter
 
 # 检测并设置设备
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -47,9 +46,6 @@ class cifarNet(nn.Module):
         x = self.fc3(x)
         return x
 
-# 创建Tensorboard writer
-writer = SummaryWriter('runs/cifar_experiment')
-
 Net = cifarNet()
 Net.to(device)  # 将模型移动到GPU
 Loss_fn = nn.CrossEntropyLoss()
@@ -70,7 +66,6 @@ for epoch in range(n_epochs):
         
         # 记录损失到Tensorboard
         global_step = epoch * len(cifar10_train_loader) + i
-        writer.add_scalar('Training Loss', loss.item(), global_step)
         
         if i % 2000 == 1999:
             print('[%d, %5d] loss: %.3f' %
@@ -121,7 +116,6 @@ for i in range(10):
     else:
         print('%s: N/A (no examples)' % CLASSES[i])
 
-writer.close()
 print('\nTensorboard logs saved to runs/cifar_experiment')
 print('Run "tensorboard --logdir=runs" to view the loss curve')
 

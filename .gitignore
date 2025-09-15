@@ -1,1 +1,9 @@
 data/cifar-10-python.tar.gz
+data/cifar-10-batches-py/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+data/cifar-10-batches-py/batches.meta
+cifar_net.pth
+runs/cifar_experiment/events.out.tfevents.1757942461.stibiums-ROG-Zephyrus-G14-GA403UV-GA403UV.4016.0
