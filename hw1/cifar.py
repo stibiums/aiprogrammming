@@ -13,7 +13,7 @@ transform = transforms.Compose([
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
 
-batch_size = 16
+batch_size = 8
 n_epochs = 10
 
 data_dir = './data/cifar-10-batches-py'
