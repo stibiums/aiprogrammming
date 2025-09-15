@@ -116,9 +116,3 @@ for i in range(10):
     else:
         print('%s: N/A (no examples)' % CLASSES[i])
 
-print('\nTensorboard logs saved to runs/cifar_experiment')
-print('Run "tensorboard --logdir=runs" to view the loss curve')
-
-
-
-
