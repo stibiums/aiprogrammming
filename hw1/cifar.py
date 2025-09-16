@@ -3,6 +3,7 @@ import torch
 from torchvision import datasets, transforms
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.utils.tensorboard import SummaryWriter
 
 # 检测并设置设备
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -51,9 +52,14 @@ Net.to(device)  # 将模型移动到GPU
 Loss_fn = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(Net.parameters(), lr=0.001, momentum=0.9)
 
+# 创建TensorBoard writer
+writer = SummaryWriter('runs/cifar_experiment')
+
 # 训练过程
 for epoch in range(n_epochs):
     running_loss = 0.0
+    Net.train()
+
     for i, data in enumerate(cifar10_train_loader, 0):
         inputs, labels = data
         inputs, labels = inputs.to(device), labels.to(device)  # 将数据移动到设备
@@ -63,16 +69,33 @@ for epoch in range(n_epochs):
         loss.backward()
         optimizer.step()
         running_loss += loss.item()
-        
-        # 记录损失到Tensorboard
-        global_step = epoch * len(cifar10_train_loader) + i
-        
-        if i % 2000 == 1999:
+
+        if i % 500 == 499:  # 每500个batch打印一次
             print('[%d, %5d] loss: %.3f' %
-                  (epoch + 1, i + 1, running_loss / 2000))
+                  (epoch + 1, i + 1, running_loss / 500))
             running_loss = 0.0
 
+    # 计算整个epoch的平均损失
+    epoch_loss = 0.0
+    Net.eval()
+    with torch.no_grad():
+        for data in cifar10_train_loader:
+            inputs, labels = data
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = Net(inputs)
+            loss = Loss_fn(outputs, labels)
+            epoch_loss += loss.item()
+
+    avg_epoch_loss = epoch_loss / len(cifar10_train_loader)
+
+    # 记录到TensorBoard
+    writer.add_scalar('Loss/Train', avg_epoch_loss, epoch)
+    print(f'Epoch [{epoch+1}/{n_epochs}] Average Loss: {avg_epoch_loss:.4f}')
+
 print('Finished Training')
+
+# 关闭TensorBoard writer
+writer.close()
 
 save_path = './cifar_net.pth'
 torch.save(Net.state_dict(), save_path)
